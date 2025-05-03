@@ -73,6 +73,20 @@
       from { transform: translateY(-100%); }
       to { transform: translateY(0); }
     }
+    
+    /* Group list styling */
+    .group-item {
+      transition: all 0.2s ease;
+    }
+    
+    .group-item:hover {
+      background-color: #f0fdf4;
+    }
+    
+    .group-item.active {
+      background-color: #d1fae5;
+      border-left: 4px solid #10b981;
+    }
   </style>
 </head>
 <body class="bg-gray-50 flex flex-col h-screen">
@@ -82,7 +96,7 @@
       <div class="flex items-center space-x-3">
         <div class="bg-white rounded-full p-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
         <div>
@@ -107,31 +121,87 @@
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar (hidden on mobile) -->
       <div id="sidebar" class="hidden md:flex md:w-1/4 bg-white border-r border-gray-200 flex-col">
-        <!-- Group info -->
+        <!-- User profile -->
         <div class="p-4 border-b border-gray-200">
           <div class="flex items-center space-x-3">
-            <div id="groupAvatar" class="h-12 w-12 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xl">
-              C
+            <div id="userAvatar" class="h-12 w-12 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xl">
+              U
             </div>
             <div>
-              <h2 id="groupNameDisplay" class="font-bold text-gray-800">ConnectChat</h2>
-              <p id="groupMemberCount" class="text-sm text-gray-500">1 member</p>
+              <h2 id="usernameDisplay" class="font-bold text-gray-800">User</h2>
+              <p class="text-sm text-gray-500">Online</p>
             </div>
           </div>
         </div>
         
-        <!-- Group actions -->
+        <!-- Group list -->
         <div class="p-4 border-b border-gray-200">
-          <button id="inviteBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Your Groups</h3>
+            <button id="createGroupBtnSidebar" class="text-emerald-600 hover:text-emerald-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          </div>
+          <div id="groupsList" class="space-y-1">
+            <!-- Groups will be listed here -->
+          </div>
+        </div>
+        
+        <!-- Join group section -->
+        <div class="p-4 border-b border-gray-200">
+          <div class="flex items-center space-x-2">
+            <input
+              id="joinGroupInput"
+              type="text"
+              placeholder="Enter group code"
+              class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            />
+            <button id="joinGroupBtnSidebar" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Group info -->
+        <div id="groupInfoSection" class="p-4 border-b border-gray-200 hidden">
+          <div class="flex items-center space-x-3">
+            <div id="groupAvatar" class="h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-lg">
+              C
+            </div>
+            <div class="flex-1">
+              <h2 id="groupNameDisplay" class="font-bold text-gray-800">ConnectChat</h2>
+              <p id="groupMemberCount" class="text-xs text-gray-500">1 member</p>
+            </div>
+            <button id="leaveGroupBtn" class="text-red-600 hover:text-red-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Group actions -->
+        <div id="groupActions" class="p-4 border-b border-gray-200 hidden">
+          <button id="inviteBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             <span>Invite Others</span>
           </button>
+          <button id="clearMessagesBtn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition text-sm mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Clear Messages</span>
+          </button>
         </div>
         
         <!-- Members list -->
-        <div class="p-4">
+        <div id="membersSection" class="flex-1 overflow-y-auto p-4 hidden">
           <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Members</h3>
           <div id="membersList" class="space-y-3">
             <!-- Members will be listed here -->
@@ -177,6 +247,14 @@
             <p class="text-gray-600 mb-6">Join a group chat or create your own to start messaging with friends, family, or colleagues.</p>
             
             <div class="space-y-4">
+              <!-- Set username -->
+              <div>
+                <label for="usernameWelcome" class="block text-sm font-medium text-gray-700 text-left mb-2">Set your display name:</label>
+                <div class="flex">
+                  <input type="text" id="usernameWelcome" placeholder="Your name" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+              </div>
+              
               <!-- Join existing group -->
               <div>
                 <label for="groupIdInput" class="block text-sm font-medium text-gray-700 text-left mb-2">Join a group with code:</label>
@@ -277,6 +355,36 @@
     </div>
   </div>
 
+  <!-- Create Group Modal -->
+  <div id="createGroupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold mb-4">Create New Group</h3>
+      
+      <div class="mb-4">
+        <label for="newGroupNameModal" class="block text-sm font-medium text-gray-700 mb-2">Group Name:</label>
+        <input type="text" id="newGroupNameModal" placeholder="Enter group name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <button id="cancelCreateGroupBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+        <button id="confirmCreateGroupBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear Messages Confirmation Modal -->
+  <div id="clearMessagesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold mb-4">Clear All Messages</h3>
+      <p class="text-gray-600 mb-6">Are you sure you want to clear all messages in this group? This action cannot be undone.</p>
+      
+      <div class="flex justify-end space-x-3">
+        <button id="cancelClearMessagesBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+        <button id="confirmClearMessagesBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Clear</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // PWA setup
     const manifestData = {
@@ -347,11 +455,15 @@
     let currentGroupId = null;
     let activeMembers = {};
     let currentGroupName = 'ConnectChat';
+    let userGroups = JSON.parse(localStorage.getItem('userGroups')) || {};
 
     // Set username from localStorage if available
     const usernameInput = document.getElementById('username');
+    const usernameWelcomeInput = document.getElementById('usernameWelcome');
     if (currentUser) {
       usernameInput.value = currentUser;
+      usernameWelcomeInput.value = currentUser;
+      updateUserAvatar();
     }
 
     // DOM Elements
@@ -381,6 +493,73 @@
     const groupIdInput = document.getElementById('groupIdInput');
     const newGroupNameInput = document.getElementById('newGroupNameInput');
     const groupAvatar = document.getElementById('groupAvatar');
+    const usernameDisplay = document.getElementById('usernameDisplay');
+    const userAvatar = document.getElementById('userAvatar');
+    const groupsList = document.getElementById('groupsList');
+    const groupInfoSection = document.getElementById('groupInfoSection');
+    const groupActions = document.getElementById('groupActions');
+    const membersSection = document.getElementById('membersSection');
+    const leaveGroupBtn = document.getElementById('leaveGroupBtn');
+    const joinGroupInput = document.getElementById('joinGroupInput');
+    const joinGroupBtnSidebar = document.getElementById('joinGroupBtnSidebar');
+    const createGroupBtnSidebar = document.getElementById('createGroupBtnSidebar');
+    const createGroupModal = document.getElementById('createGroupModal');
+    const newGroupNameModal = document.getElementById('newGroupNameModal');
+    const confirmCreateGroupBtn = document.getElementById('confirmCreateGroupBtn');
+    const cancelCreateGroupBtn = document.getElementById('cancelCreateGroupBtn');
+    const clearMessagesBtn = document.getElementById('clearMessagesBtn');
+    const clearMessagesModal = document.getElementById('clearMessagesModal');
+    const confirmClearMessagesBtn = document.getElementById('confirmClearMessagesBtn');
+    const cancelClearMessagesBtn = document.getElementById('cancelClearMessagesBtn');
+
+    // Update user avatar display
+    function updateUserAvatar() {
+      if (currentUser) {
+        userAvatar.textContent = currentUser.charAt(0).toUpperCase();
+        usernameDisplay.textContent = currentUser;
+      }
+    }
+
+    // Update groups list in sidebar
+    function updateGroupsList() {
+      groupsList.innerHTML = '';
+      
+      Object.keys(userGroups).forEach(groupId => {
+        const group = userGroups[groupId];
+        const isActive = groupId === currentGroupId;
+        
+        const groupElement = document.createElement('div');
+        groupElement.className = `group-item p-2 rounded-lg cursor-pointer flex items-center justify-between ${isActive ? 'active' : ''}`;
+        groupElement.dataset.groupId = groupId;
+        
+        groupElement.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <div class="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-medium">
+              ${group.name.charAt(0).toUpperCase()}
+            </div>
+            <div class="flex-1 truncate">
+              <p class="text-sm font-medium text-gray-800 truncate">${group.name}</p>
+              <p class="text-xs text-gray-500 truncate">${groupId}</p>
+            </div>
+          </div>
+        `;
+        
+        groupElement.addEventListener('click', () => {
+          joinGroup(groupId);
+        });
+        
+        groupsList.appendChild(groupElement);
+      });
+      
+      // Show "No groups" message if empty
+      if (Object.keys(userGroups).length === 0) {
+        groupsList.innerHTML = `
+          <div class="text-center py-4 text-gray-500 text-sm">
+            You haven't joined any groups yet
+          </div>
+        `;
+      }
+    }
 
     // Check URL for group ID
     function checkUrlForGroupId() {
@@ -392,29 +571,67 @@
     }
 
     // Create a new group
-    createGroupBtn.addEventListener('click', () => {
-      const groupName = newGroupNameInput.value.trim();
-      if (groupName) {
-        // Generate a random group ID
-        const groupId = Math.random().toString(36).substring(2, 10);
-        joinGroup(groupId, groupName);
-      } else {
-        showNotification('Please enter a group name');
-      }
-    });
+    function createNewGroup(groupName) {
+      if (!groupName) return;
+      
+      // Generate a random group ID
+      const groupId = Math.random().toString(36).substring(2, 10);
+      
+      // Save to user's groups
+      userGroups[groupId] = {
+        name: groupName,
+        joinedAt: Date.now()
+      };
+      localStorage.setItem('userGroups', JSON.stringify(userGroups));
+      
+      joinGroup(groupId, groupName);
+    }
 
     // Join existing group
-    joinGroupBtn.addEventListener('click', () => {
-      const groupId = groupIdInput.value.trim();
-      if (groupId) {
+    function joinExistingGroup(groupId) {
+      if (!groupId) return;
+      
+      // If already in this group, just return
+      if (groupId === currentGroupId) return;
+      
+      // If group exists in user's list, join it
+      if (userGroups[groupId]) {
         joinGroup(groupId);
-      } else {
-        showNotification('Please enter a group code');
+        return;
       }
-    });
+      
+      // Otherwise, check if group exists in GunDB
+      const group = gun.get(`groups/${groupId}`);
+      group.get('name').once((name) => {
+        if (name) {
+          // Group exists, add to user's groups
+          userGroups[groupId] = {
+            name: name,
+            joinedAt: Date.now()
+          };
+          localStorage.setItem('userGroups', JSON.stringify(userGroups));
+          updateGroupsList();
+          
+          joinGroup(groupId);
+        } else {
+          showNotification('Group not found');
+        }
+      });
+    }
 
     // Join a group function
     function joinGroup(groupId, newGroupName = null) {
+      // Clear previous group listeners
+      if (currentGroupId) {
+        gun.get(`groups/${currentGroupId}`).get('messages').off();
+        gun.get(`groups/${currentGroupId}`).get('members').off();
+        gun.get(`groups/${currentGroupId}`).get('name').off();
+        
+        // Mark user as inactive in previous group
+        const prevMemberNode = gun.get(`groups/${currentGroupId}`).get('members').get(currentUser);
+        prevMemberNode.get('active').put(false);
+      }
+      
       currentGroupId = groupId;
       
       // Save group ID to URL for sharing
@@ -423,17 +640,31 @@
       window.history.pushState({}, '', newUrl);
       
       // Get username first
-      if (!usernameInput.value.trim()) {
+      const username = usernameInput.value.trim() || usernameWelcomeInput.value.trim();
+      if (!username) {
         const randomUsername = 'User' + Math.floor(Math.random() * 1000);
         usernameInput.value = randomUsername;
+        usernameWelcomeInput.value = randomUsername;
+        currentUser = randomUsername;
+      } else {
+        currentUser = username;
       }
-      currentUser = usernameInput.value.trim();
+      
       localStorage.setItem('username', currentUser);
+      updateUserAvatar();
       
       // Switch to chat view
       welcomeScreen.classList.add('hidden');
       chatArea.classList.remove('hidden');
       messageInputArea.classList.remove('hidden');
+      
+      // Show group info in sidebar
+      groupInfoSection.classList.remove('hidden');
+      groupActions.classList.remove('hidden');
+      membersSection.classList.remove('hidden');
+      
+      // Clear messages
+      messagesContainer.innerHTML = '';
       
       // Set up group
       const group = gun.get(`groups/${groupId}`);
@@ -441,7 +672,15 @@
       // Set group name if provided
       if (newGroupName) {
         group.get('name').put(newGroupName);
+        userGroups[groupId] = {
+          name: newGroupName,
+          joinedAt: Date.now()
+        };
+        localStorage.setItem('userGroups', JSON.stringify(userGroups));
       }
+      
+      // Update groups list
+      updateGroupsList();
       
       // Listen for group name
       group.get('name').on((name) => {
@@ -449,6 +688,13 @@
           currentGroupName = name;
           chatHeader.textContent = name;
           groupNameDisplay.textContent = name;
+          
+          // Update in user's groups if changed
+          if (userGroups[groupId] && userGroups[groupId].name !== name) {
+            userGroups[groupId].name = name;
+            localStorage.setItem('userGroups', JSON.stringify(userGroups));
+            updateGroupsList();
+          }
           
           // Set first letter as avatar
           groupAvatar.textContent = name.charAt(0).toUpperCase();
@@ -487,18 +733,16 @@
       });
       
       // Update last seen regularly
-      setInterval(() => {
-        if (currentGroupId) {
+      const presenceInterval = setInterval(() => {
+        if (currentGroupId === groupId) {
           memberNode.get('lastSeen').put(Date.now());
+        } else {
+          clearInterval(presenceInterval);
         }
       }, 30000);
       
-      // Handle member leaving
-      window.addEventListener('beforeunload', () => {
-        memberNode.get('active').put(false);
-      });
-      
       // Listen for members
+      activeMembers = {};
       group.get('members').map().on((data, id) => {
         if (data && data.lastSeen) {
           // Add to active members
@@ -524,6 +768,54 @@
         timestamp: Date.now()
       };
       group.get('messages').set(welcomeMessage);
+    }
+
+    // Leave current group
+    function leaveCurrentGroup() {
+      if (!currentGroupId) return;
+      
+      // Mark user as inactive
+      const memberNode = gun.get(`groups/${currentGroupId}`).get('members').get(currentUser);
+      memberNode.get('active').put(false);
+      
+      // Remove group from user's list if they want to leave completely
+      delete userGroups[currentGroupId];
+      localStorage.setItem('userGroups', JSON.stringify(userGroups));
+      updateGroupsList();
+      
+      // Clear current group
+      currentGroupId = null;
+      
+      // Clear URL group parameter
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.delete('group');
+      window.history.pushState({}, '', newUrl);
+      
+      // Show welcome screen
+      welcomeScreen.classList.remove('hidden');
+      chatArea.classList.add('hidden');
+      messageInputArea.classList.add('hidden');
+      
+      // Hide group info in sidebar
+      groupInfoSection.classList.add('hidden');
+      groupActions.classList.add('hidden');
+      membersSection.classList.add('hidden');
+      
+      // Clear messages
+      messagesContainer.innerHTML = '';
+      
+      showNotification('You have left the group');
+    }
+
+    // Clear messages in current group
+    function clearMessages() {
+      if (!currentGroupId) return;
+      
+      // In a real app, we would implement actual message deletion
+      // For this demo, we'll just clear the local display
+      messagesContainer.innerHTML = '';
+      
+      showNotification('Messages cleared');
     }
 
     // Update members list display
@@ -611,6 +903,21 @@
       messageInput.value = '';
     }
 
+    // Show notification
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    }
+
     // Event listeners
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
@@ -648,21 +955,6 @@
         .catch(err => console.error('Failed to copy:', err));
     });
 
-    // Show notification
-    function showNotification(message) {
-      const notification = document.createElement('div');
-      notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }, 3000);
-    }
-
     // Request notification permission
     notificationBtn.addEventListener('click', () => {
       if (Notification.permission === 'default') {
@@ -691,8 +983,113 @@
       document.documentElement.classList.add('dark');
     }
 
+    // Create group from welcome screen
+    createGroupBtn.addEventListener('click', () => {
+      const groupName = newGroupNameInput.value.trim();
+      if (groupName) {
+        createNewGroup(groupName);
+      } else {
+        showNotification('Please enter a group name');
+      }
+    });
+
+    // Join group from welcome screen
+    joinGroupBtn.addEventListener('click', () => {
+      const groupId = groupIdInput.value.trim();
+      if (groupId) {
+        joinExistingGroup(groupId);
+      } else {
+        showNotification('Please enter a group code');
+      }
+    });
+
+    // Create group from sidebar
+    createGroupBtnSidebar.addEventListener('click', () => {
+      createGroupModal.classList.remove('hidden');
+    });
+
+    // Confirm create group
+    confirmCreateGroupBtn.addEventListener('click', () => {
+      const groupName = newGroupNameModal.value.trim();
+      if (groupName) {
+        createNewGroup(groupName);
+        createGroupModal.classList.add('hidden');
+        newGroupNameModal.value = '';
+      } else {
+        showNotification('Please enter a group name');
+      }
+    });
+
+    // Cancel create group
+    cancelCreateGroupBtn.addEventListener('click', () => {
+      createGroupModal.classList.add('hidden');
+      newGroupNameModal.value = '';
+    });
+
+    // Join group from sidebar
+    joinGroupBtnSidebar.addEventListener('click', () => {
+      const groupId = joinGroupInput.value.trim();
+      if (groupId) {
+        joinExistingGroup(groupId);
+        joinGroupInput.value = '';
+      } else {
+        showNotification('Please enter a group code');
+      }
+    });
+
+    // Leave group
+    leaveGroupBtn.addEventListener('click', () => {
+      leaveCurrentGroup();
+    });
+
+    // Clear messages button
+    clearMessagesBtn.addEventListener('click', () => {
+      clearMessagesModal.classList.remove('hidden');
+    });
+
+    // Confirm clear messages
+    confirmClearMessagesBtn.addEventListener('click', () => {
+      clearMessages();
+      clearMessagesModal.classList.add('hidden');
+    });
+
+    // Cancel clear messages
+    cancelClearMessagesBtn.addEventListener('click', () => {
+      clearMessagesModal.classList.add('hidden');
+    });
+
+    // Username change from welcome screen
+    usernameWelcomeInput.addEventListener('change', () => {
+      const newUsername = usernameWelcomeInput.value.trim();
+      if (newUsername) {
+        currentUser = newUsername;
+        localStorage.setItem('username', currentUser);
+        updateUserAvatar();
+      }
+    });
+
+    // Username change from chat
+    usernameInput.addEventListener('change', () => {
+      const newUsername = usernameInput.value.trim();
+      if (newUsername) {
+        currentUser = newUsername;
+        localStorage.setItem('username', currentUser);
+        updateUserAvatar();
+        
+        // Update in current group if joined
+        if (currentGroupId) {
+          const memberNode = gun.get(`groups/${currentGroupId}`).get('members').get(currentUser);
+          memberNode.put({
+            lastSeen: Date.now(),
+            active: true
+          });
+        }
+      }
+    });
+
     // Initialize the app
     checkUrlForGroupId();
+    updateGroupsList();
   </script>
 </body>
 </html>
