@@ -73,16 +73,6 @@
       from { transform: translateY(-100%); }
       to { transform: translateY(0); }
     }
-
-    /* Group card hover effect */
-    .group-card {
-      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    
-    .group-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
   </style>
 </head>
 <body class="bg-gray-50 flex flex-col h-screen">
@@ -117,25 +107,6 @@
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar (hidden on mobile) -->
       <div id="sidebar" class="hidden md:flex md:w-1/4 bg-white border-r border-gray-200 flex-col">
-        <!-- User profile -->
-        <div class="p-4 border-b border-gray-200">
-          <div class="flex items-center space-x-3">
-            <div id="userAvatar" class="h-12 w-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-xl">
-              U
-            </div>
-            <div class="flex-1">
-              <input 
-                type="text" 
-                id="profileUsername" 
-                class="font-bold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-emerald-500 focus:outline-none transition w-full" 
-                placeholder="Your username" 
-                value=""
-              />
-              <p class="text-sm text-gray-500">Set your username</p>
-            </div>
-          </div>
-        </div>
-        
         <!-- Group info -->
         <div class="p-4 border-b border-gray-200">
           <div class="flex items-center space-x-3">
@@ -150,38 +121,12 @@
         </div>
         
         <!-- Group actions -->
-        <div class="p-4 border-b border-gray-200 space-y-2">
+        <div class="p-4 border-b border-gray-200">
           <button id="inviteBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             <span>Invite Others</span>
-          </button>
-          
-          <button id="clearMessagesBtn" class="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            <span>Clear Messages</span>
-          </button>
-          
-          <button id="leaveGroupBtn" class="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Leave Group</span>
-          </button>
-        </div>
-        
-        <!-- My Groups -->
-        <div class="p-4 border-b border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">My Groups</h3>
-          <div id="myGroupsList" class="space-y-2">
-            <!-- Joined groups will be listed here -->
-            <p class="text-sm text-gray-500 italic">No groups joined yet</p>
-          </div>
-          <button id="showAllGroupsBtn" class="mt-3 text-sm text-emerald-600 hover:text-emerald-800">
-            Browse All Available Groups
           </button>
         </div>
         
@@ -231,12 +176,6 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome to ConnectChat!</h2>
             <p class="text-gray-600 mb-6">Join a group chat or create your own to start messaging with friends, family, or colleagues.</p>
             
-            <!-- Username set -->
-            <div class="mb-6">
-              <label for="welcomeUsernameInput" class="block text-sm font-medium text-gray-700 text-left mb-2">Set your username:</label>
-              <input type="text" id="welcomeUsernameInput" placeholder="Your username" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-            </div>
-            
             <div class="space-y-4">
               <!-- Join existing group -->
               <div>
@@ -255,31 +194,6 @@
                   <button id="createGroupBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-r-lg transition">Create</button>
                 </div>
               </div>
-              
-              <!-- Browse available groups -->
-              <button id="browseGroupsBtn" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg py-2 px-4 transition">
-                Browse Available Groups
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Available Groups Screen -->
-        <div id="availableGroupsScreen" class="flex-1 overflow-y-auto p-6 bg-white hidden">
-          <div class="max-w-4xl mx-auto">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-bold text-gray-800">Available Groups</h2>
-              <button id="backToWelcomeBtn" class="flex items-center space-x-2 text-emerald-600 hover:text-emerald-800 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Back</span>
-              </button>
-            </div>
-            
-            <div id="availableGroupsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <!-- Available groups will be listed here -->
-              <p class="text-gray-500 col-span-full text-center py-8">Loading available groups...</p>
             </div>
           </div>
         </div>
@@ -318,7 +232,7 @@
               class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg transition flex items-center justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9.2-9-18-9 18 9-2zm0 0v-8" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
             </button>
           </div>
@@ -359,32 +273,6 @@
       
       <div class="flex justify-end">
         <button id="closeInviteModalBtn" class="text-gray-500 hover:text-gray-700">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Confirm Clear Messages Modal -->
-  <div id="clearMessagesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-      <h3 class="text-lg font-semibold mb-4">Clear All Messages</h3>
-      <p class="text-gray-600 mb-6">Are you sure you want to clear all messages in this group? This action cannot be undone.</p>
-      
-      <div class="flex justify-end space-x-3">
-        <button id="cancelClearBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700">Cancel</button>
-        <button id="confirmClearBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">Clear All</button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Confirm Leave Group Modal -->
-  <div id="leaveGroupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-      <h3 class="text-lg font-semibold mb-4">Leave Group</h3>
-      <p class="text-gray-600 mb-6">Are you sure you want to leave this group? You can rejoin later with the group code.</p>
-      
-      <div class="flex justify-end space-x-3">
-        <button id="cancelLeaveBtn" class="px-4 py-2 text-gray-500 hover:text-gray-700">Cancel</button>
-        <button id="confirmLeaveBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">Leave Group</button>
       </div>
     </div>
   </div>
@@ -435,13 +323,14 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(choiceResult => {
-            if (choiceResult.outcome === 'accepted') {
+          if (choiceResult.outcome === 'accepted') {
             console.log('User accepted the install prompt');
-          } else {
-            console.log('User dismissed the install prompt');
           }
           deferredPrompt = null;
         });
+      } else {
+        // Fallback for demo
+        alert('To install this app on your device:\n\n1. Add this page to your home screen\n2. Look for "Add to Home Screen" in your browser menu');
       }
       installBanner.classList.add('hidden');
     });
@@ -450,12 +339,346 @@
       installBanner.classList.add('hidden');
     });
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
+    // Initialize Gun with a relay server
+    const gun = Gun('https://gun-manhattan.herokuapp.com/gun');
+
+    // Main app functionality
+    let currentUser = localStorage.getItem('username') || '';
+    let currentGroupId = null;
+    let activeMembers = {};
+    let currentGroupName = 'ConnectChat';
+
+    // Set username from localStorage if available
+    const usernameInput = document.getElementById('username');
+    if (currentUser) {
+      usernameInput.value = currentUser;
+    }
+
+    // DOM Elements
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const chatArea = document.getElementById('chatArea');
+    const messageInputArea = document.getElementById('messageInputArea');
+    const messageInput = document.getElementById('message');
+    const sendButton = document.getElementById('send');
+    const messagesContainer = document.getElementById('messages');
+    const membersList = document.getElementById('membersList');
+    const groupMemberCount = document.getElementById('groupMemberCount');
+    const chatHeader = document.getElementById('chatHeader');
+    const groupNameDisplay = document.getElementById('groupNameDisplay');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const sidebar = document.getElementById('sidebar');
+    const joinGroupBtn = document.getElementById('joinGroupBtn');
+    const createGroupBtn = document.getElementById('createGroupBtn');
+    const inviteBtn = document.getElementById('inviteBtn');
+    const inviteModal = document.getElementById('inviteModal');
+    const closeInviteModalBtn = document.getElementById('closeInviteModalBtn');
+    const inviteCodeDisplay = document.getElementById('inviteCodeDisplay');
+    const inviteLinkDisplay = document.getElementById('inviteLinkDisplay');
+    const copyInviteBtn = document.getElementById('copyInviteBtn');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const notificationToast = document.getElementById('notificationToast');
+    const notificationSender = document.getElementById('notificationSender');
+    const groupIdInput = document.getElementById('groupIdInput');
+    const newGroupNameInput = document.getElementById('newGroupNameInput');
+    const groupAvatar = document.getElementById('groupAvatar');
+
+    // Check URL for group ID
+    function checkUrlForGroupId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const groupId = urlParams.get('group');
+      if (groupId) {
+        joinGroup(groupId);
+      }
+    }
+
+    // Create a new group
+    createGroupBtn.addEventListener('click', () => {
+      const groupName = newGroupNameInput.value.trim();
+      if (groupName) {
+        // Generate a random group ID
+        const groupId = Math.random().toString(36).substring(2, 10);
+        joinGroup(groupId, groupName);
+      } else {
+        showNotification('Please enter a group name');
+      }
     });
 
-    // Theme toggle
+    // Join existing group
+    joinGroupBtn.addEventListener('click', () => {
+      const groupId = groupIdInput.value.trim();
+      if (groupId) {
+        joinGroup(groupId);
+      } else {
+        showNotification('Please enter a group code');
+      }
+    });
+
+    // Join a group function
+    function joinGroup(groupId, newGroupName = null) {
+      currentGroupId = groupId;
+      
+      // Save group ID to URL for sharing
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('group', groupId);
+      window.history.pushState({}, '', newUrl);
+      
+      // Get username first
+      if (!usernameInput.value.trim()) {
+        const randomUsername = 'User' + Math.floor(Math.random() * 1000);
+        usernameInput.value = randomUsername;
+      }
+      currentUser = usernameInput.value.trim();
+      localStorage.setItem('username', currentUser);
+      
+      // Switch to chat view
+      welcomeScreen.classList.add('hidden');
+      chatArea.classList.remove('hidden');
+      messageInputArea.classList.remove('hidden');
+      
+      // Set up group
+      const group = gun.get(`groups/${groupId}`);
+      
+      // Set group name if provided
+      if (newGroupName) {
+        group.get('name').put(newGroupName);
+      }
+      
+      // Listen for group name
+      group.get('name').on((name) => {
+        if (name) {
+          currentGroupName = name;
+          chatHeader.textContent = name;
+          groupNameDisplay.textContent = name;
+          
+          // Set first letter as avatar
+          groupAvatar.textContent = name.charAt(0).toUpperCase();
+        }
+      });
+      
+      // Listen for messages
+      group.get('messages').map().on((data, id) => {
+        if (data && data.user && data.text && data.timestamp) {
+          displayMessage(data, id);
+          
+          // Show notification if not from current user
+          if (data.user !== currentUser && document.hidden) {
+            notificationSender.textContent = data.user;
+            notificationToast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+              notificationToast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+            
+            // Show browser notification if permitted
+            if (Notification.permission === 'granted') {
+              new Notification(`New message from ${data.user}`, {
+                body: data.text,
+                icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiMxMGI5ODE7Ij48cGF0aCBkPSJNOCAxMmguMDFNMTIgMTJoLjAxTTE2IDEyaC4wMU0yMSAxMmMwIDQuNDE4LTQuMDMgOC05IDhhOS44NjMgOS44NjMgMCAwMS00LjI1NS0uOTQ5TDMgMjBsMS4zOTUtMy43MkMzLjUxMiAxNS4wNDIgMyAxMy41NzQgMyAxMmMwLTQuNDE4IDQuMDMtOCA5LThzOSAzLjU4MiA5IDh6Ij48L3BhdGg+PC9zdmc+'
+              });
+            }
+          }
+        }
+      });
+      
+      // Handle member presence
+      const memberNode = group.get('members').get(currentUser);
+      memberNode.put({
+        lastSeen: Date.now(),
+        active: true
+      });
+      
+      // Update last seen regularly
+      setInterval(() => {
+        if (currentGroupId) {
+          memberNode.get('lastSeen').put(Date.now());
+        }
+      }, 30000);
+      
+      // Handle member leaving
+      window.addEventListener('beforeunload', () => {
+        memberNode.get('active').put(false);
+      });
+      
+      // Listen for members
+      group.get('members').map().on((data, id) => {
+        if (data && data.lastSeen) {
+          // Add to active members
+          const isActive = data.active !== false && Date.now() - data.lastSeen < 300000; // 5 minutes
+          activeMembers[id] = {
+            name: id,
+            lastSeen: data.lastSeen,
+            active: isActive
+          };
+          
+          updateMembersList();
+        }
+      });
+      
+      // Set up invite modal
+      inviteCodeDisplay.value = groupId;
+      inviteLinkDisplay.value = `${window.location.origin}${window.location.pathname}?group=${groupId}`;
+      
+      // Show welcome message
+      const welcomeMessage = {
+        user: 'System',
+        text: `${currentUser} has joined the chat`,
+        timestamp: Date.now()
+      };
+      group.get('messages').set(welcomeMessage);
+    }
+
+    // Update members list display
+    function updateMembersList() {
+      membersList.innerHTML = '';
+      let activeCount = 0;
+      
+      Object.keys(activeMembers).forEach(memberId => {
+        const member = activeMembers[memberId];
+        if (member.active) activeCount++;
+        
+        const memberElement = document.createElement('div');
+        memberElement.className = 'flex items-center space-x-2';
+        
+        const statusColor = member.active ? 'bg-emerald-500' : 'bg-gray-400';
+        const statusText = member.active ? 'Online' : 'Offline';
+        
+        memberElement.innerHTML = `
+          <div class="relative">
+            <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-medium">
+              ${memberId.charAt(0).toUpperCase()}
+            </div>
+            <div class="absolute bottom-0 right-0 h-3 w-3 ${statusColor} rounded-full border-2 border-white"></div>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">${memberId}</p>
+            <p class="text-xs text-gray-500">${statusText}</p>
+          </div>
+        `;
+        
+        membersList.appendChild(memberElement);
+      });
+      
+      groupMemberCount.textContent = `${activeCount} member${activeCount !== 1 ? 's' : ''}`;
+    }
+
+    // Display a message in the chat
+    function displayMessage(data, id) {
+      // Check if message already exists
+      if (document.getElementById(`message-${id}`)) return;
+      
+      const isCurrentUser = data.user === currentUser;
+      const messageElement = document.createElement('div');
+      messageElement.id = `message-${id}`;
+      messageElement.className = `message-bubble flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`;
+      
+      const bubbleClass = isCurrentUser 
+        ? 'bg-emerald-600 text-white rounded-l-lg rounded-br-lg' 
+        : 'bg-white text-gray-800 rounded-r-lg rounded-bl-lg border border-gray-200';
+      
+      const time = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      messageElement.innerHTML = `
+        <div class="max-w-xs md:max-w-md lg:max-w-lg">
+          ${!isCurrentUser ? `<p class="text-xs font-semibold text-gray-600 mb-1">${data.user}</p>` : ''}
+          <div class="flex items-end space-x-1">
+            <div class="${bubbleClass} px-4 py-2">
+              <p class="break-words">${data.text}</p>
+            </div>
+            <p class="text-xs text-gray-500">${time}</p>
+          </div>
+        </div>
+      `;
+      
+      messagesContainer.appendChild(messageElement);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Send a message
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text || !currentGroupId || !currentUser) return;
+      
+      const message = {
+        user: currentUser,
+        text: text,
+        timestamp: Date.now()
+      };
+      
+      // Save to GunDB
+      const group = gun.get(`groups/${currentGroupId}`);
+      group.get('messages').set(message);
+      
+      // Clear input
+      messageInput.value = '';
+    }
+
+    // Event listeners
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Toggle sidebar on mobile
+    toggleSidebarBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+
+    // Show invite modal
+    inviteBtn.addEventListener('click', () => {
+      inviteModal.classList.remove('hidden');
+    });
+
+    // Close invite modal
+    closeInviteModalBtn.addEventListener('click', () => {
+      inviteModal.classList.add('hidden');
+    });
+
+    // Copy invite code
+    copyInviteBtn.addEventListener('click', () => {
+      clipboardPolyfill.writeText(inviteCodeDisplay.value)
+        .then(() => showNotification('Group code copied!'))
+        .catch(err => console.error('Failed to copy:', err));
+    });
+
+    // Copy invite link
+    copyLinkBtn.addEventListener('click', () => {
+      clipboardPolyfill.writeText(inviteLinkDisplay.value)
+        .then(() => showNotification('Link copied!'))
+        .catch(err => console.error('Failed to copy:', err));
+    });
+
+    // Show notification
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // Request notification permission
+    notificationBtn.addEventListener('click', () => {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            showNotification('Notifications enabled!');
+          }
+        });
+      } else if (Notification.permission === 'granted') {
+        showNotification('Notifications are already enabled');
+      } else {
+        showNotification('Notifications are blocked in your browser settings');
+      }
+    });
+
+    // Toggle dark/light theme
     const toggleThemeBtn = document.getElementById('toggleThemeBtn');
     toggleThemeBtn.addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
@@ -463,483 +686,13 @@
     });
 
     // Check for saved theme preference
-    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
 
-    // Initialize GUN
-    const gun = Gun({
-      peers: ['https://gun-manhattan.herokuapp.com/gun'],
-      localStorage: false,
-      radisk: false
-    });
-
-    // Chat state variables
-    let currentGroup = null;
-    let username = '';
-    let userColor = '';
-    let messages = [];
-
-    // DOM elements
-    const welcomeScreen = document.getElementById('welcomeScreen');
-    const availableGroupsScreen = document.getElementById('availableGroupsScreen');
-    const chatArea = document.getElementById('chatArea');
-    const messageInputArea = document.getElementById('messageInputArea');
-    const messagesContainer = document.getElementById('messages');
-    const messageInput = document.getElementById('message');
-    const usernameInput = document.getElementById('username');
-    const welcomeUsernameInput = document.getElementById('welcomeUsernameInput');
-    const profileUsernameInput = document.getElementById('profileUsername');
-    const userAvatar = document.getElementById('userAvatar');
-    const groupAvatar = document.getElementById('groupAvatar');
-    const groupNameDisplay = document.getElementById('groupNameDisplay');
-    const groupMemberCount = document.getElementById('groupMemberCount');
-    const membersList = document.getElementById('membersList');
-    const myGroupsList = document.getElementById('myGroupsList');
-    const availableGroupsList = document.getElementById('availableGroupsList');
-
-    // Buttons
-    const joinGroupBtn = document.getElementById('joinGroupBtn');
-    const createGroupBtn = document.getElementById('createGroupBtn');
-    const browseGroupsBtn = document.getElementById('browseGroupsBtn');
-    const backToWelcomeBtn = document.getElementById('backToWelcomeBtn');
-    const showAllGroupsBtn = document.getElementById('showAllGroupsBtn');
-    const sendBtn = document.getElementById('send');
-    const inviteBtn = document.getElementById('inviteBtn');
-    const clearMessagesBtn = document.getElementById('clearMessagesBtn');
-    const leaveGroupBtn = document.getElementById('leaveGroupBtn');
-    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-    const sidebar = document.getElementById('sidebar');
-
-    // Modals
-    const inviteModal = document.getElementById('inviteModal');
-    const inviteCodeDisplay = document.getElementById('inviteCodeDisplay');
-    const inviteLinkDisplay = document.getElementById('inviteLinkDisplay');
-    const copyInviteBtn = document.getElementById('copyInviteBtn');
-    const copyLinkBtn = document.getElementById('copyLinkBtn');
-    const closeInviteModalBtn = document.getElementById('closeInviteModalBtn');
-    
-    const clearMessagesModal = document.getElementById('clearMessagesModal');
-    const cancelClearBtn = document.getElementById('cancelClearBtn');
-    const confirmClearBtn = document.getElementById('confirmClearBtn');
-    
-    const leaveGroupModal = document.getElementById('leaveGroupModal');
-    const cancelLeaveBtn = document.getElementById('cancelLeaveBtn');
-    const confirmLeaveBtn = document.getElementById('confirmLeaveBtn');
-
-    // Notification
-    const notificationToast = document.getElementById('notificationToast');
-    const notificationSender = document.getElementById('notificationSender');
-
-    // Generate a random color for the user
-    function generateUserColor() {
-      const colors = [
-        'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500',
-        'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-gray-500'
-      ];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    // Set username
-    function setUsername(newUsername) {
-      username = newUsername.trim();
-      if (username) {
-        userColor = generateUserColor();
-        userAvatar.textContent = username.charAt(0).toUpperCase();
-        userAvatar.className = `h-12 w-12 rounded-full ${userColor} flex items-center justify-center text-white font-bold text-xl`;
-        
-        // Update username in all inputs
-        usernameInput.value = username;
-        welcomeUsernameInput.value = username;
-        profileUsernameInput.value = username;
-        
-        localStorage.setItem('username', username);
-      }
-    }
-
-    // Load username from localStorage if available
-    if (localStorage.getItem('username')) {
-      setUsername(localStorage.getItem('username'));
-    }
-
-    // Username input event listeners
-    welcomeUsernameInput.addEventListener('change', (e) => {
-      setUsername(e.target.value);
-    });
-
-    profileUsernameInput.addEventListener('change', (e) => {
-      setUsername(e.target.value);
-    });
-
-    usernameInput.addEventListener('change', (e) => {
-      setUsername(e.target.value);
-    });
-
-    // Join group function
-    function joinGroup(groupId, groupName) {
-      if (!username) {
-        alert('Please set a username first');
-        return;
-      }
-
-      currentGroup = {
-        id: groupId,
-        name: groupName || `Group ${groupId.substring(0, 6)}`
-      };
-
-      // Update UI
-      welcomeScreen.classList.add('hidden');
-      availableGroupsScreen.classList.add('hidden');
-      chatArea.classList.remove('hidden');
-      messageInputArea.classList.remove('hidden');
-      
-      groupNameDisplay.textContent = currentGroup.name;
-      groupAvatar.textContent = currentGroup.name.charAt(0).toUpperCase();
-      
-      // Load messages
-      loadMessages();
-      
-      // Update group in localStorage
-      saveJoinedGroup(currentGroup.id, currentGroup.name);
-      
-      // Listen for new messages
-      listenForMessages();
-      
-      // Update members list
-      updateMembersList();
-    }
-
-    // Create group function
-    function createGroup(groupName) {
-      if (!username) {
-        alert('Please set a username first');
-        return;
-      }
-
-      const groupId = generateGroupId();
-      joinGroup(groupId, groupName);
-    }
-
-    // Generate a random group ID
-    function generateGroupId() {
-      return Math.random().toString(36).substring(2, 10);
-    }
-
-    // Load messages from GUN
-    function loadMessages() {
-      messagesContainer.innerHTML = '';
-      gun.get(`group_${currentGroup.id}`).map().once((data, id) => {
-        if (data && id !== '_') {
-          addMessageToUI(data);
-        }
-      });
-    }
-
-    // Listen for new messages
-    function listenForMessages() {
-      gun.get(`group_${currentGroup.id}`).map().on((data, id) => {
-        if (data && id !== '_' && !messages.some(msg => msg.id === id)) {
-          addMessageToUI(data);
-          
-          // Show notification if not focused
-          if (document.hidden) {
-            showNotification(data.username);
-          }
-        }
-      });
-    }
-
-    // Add message to UI
-    function addMessageToUI(data) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message-bubble';
-      
-      const isCurrentUser = data.username === username;
-      
-      messageDiv.innerHTML = `
-        <div class="flex ${isCurrentUser ? 'justify-end' : 'justify-start'}">
-          <div class="flex ${isCurrentUser ? 'flex-row-reverse' : ''} items-end space-x-2 max-w-xs md:max-w-md">
-            ${!isCurrentUser ? `
-              <div class="h-8 w-8 rounded-full ${data.color || 'bg-gray-500'} flex items-center justify-center text-white font-bold text-sm">
-                ${data.username ? data.username.charAt(0).toUpperCase() : '?'}
-              </div>
-            ` : ''}
-            <div class="${isCurrentUser ? 'bg-emerald-500 text-white' : 'bg-white border border-gray-200'} rounded-lg p-3">
-              ${!isCurrentUser ? `<p class="text-xs font-semibold ${data.color?.replace('bg', 'text') || 'text-gray-500'} mb-1">${data.username}</p>` : ''}
-              <p>${data.text}</p>
-              <p class="text-xs ${isCurrentUser ? 'text-emerald-100' : 'text-gray-500'} mt-1 text-right">${formatTime(data.timestamp)}</p>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      messagesContainer.appendChild(messageDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    // Format time
-    function formatTime(timestamp) {
-      if (!timestamp) return '';
-      const date = new Date(timestamp);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    // Send message
-    function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text || !username || !currentGroup) return;
-
-      const messageData = {
-        username: username,
-        text: text,
-        timestamp: Date.now(),
-        color: userColor
-      };
-
-      gun.get(`group_${currentGroup.id}`).set(messageData);
-      messageInput.value = '';
-    }
-
-    // Show notification
-    function showNotification(sender) {
-      notificationSender.textContent = sender || 'Someone';
-      notificationToast.classList.remove('translate-y-20', 'opacity-0');
-      notificationToast.classList.add('translate-y-0', 'opacity-100');
-      
-      setTimeout(() => {
-        notificationToast.classList.remove('translate-y-0', 'opacity-100');
-        notificationToast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
-    }
-
-    // Update members list
-    function updateMembersList() {
-      // In a real app, we would track members joining/leaving
-      // For demo purposes, we'll just show a static list
-      membersList.innerHTML = `
-        <div class="flex items-center space-x-3">
-          <div class="h-8 w-8 rounded-full ${userColor} flex items-center justify-center text-white font-bold text-sm">
-            ${username.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <p class="text-sm font-medium">${username} (You)</p>
-            <p class="text-xs text-gray-500">Online</p>
-          </div>
-        </div>
-      `;
-    }
-
-    // Save joined group to localStorage
-    function saveJoinedGroup(groupId, groupName) {
-      const joinedGroups = JSON.parse(localStorage.getItem('joinedGroups') || '{}');
-      joinedGroups[groupId] = groupName;
-      localStorage.setItem('joinedGroups', JSON.stringify(joinedGroups));
-      updateMyGroupsList();
-    }
-
-    // Remove joined group from localStorage
-    function removeJoinedGroup(groupId) {
-      const joinedGroups = JSON.parse(localStorage.getItem('joinedGroups') || '{}');
-      delete joinedGroups[groupId];
-      localStorage.setItem('joinedGroups', JSON.stringify(joinedGroups));
-      updateMyGroupsList();
-    }
-
-    // Update my groups list
-    function updateMyGroupsList() {
-      const joinedGroups = JSON.parse(localStorage.getItem('joinedGroups') || '{}');
-      
-      if (Object.keys(joinedGroups).length === 0) {
-        myGroupsList.innerHTML = '<p class="text-sm text-gray-500 italic">No groups joined yet</p>';
-        return;
-      }
-      
-      myGroupsList.innerHTML = '';
-      Object.entries(joinedGroups).forEach(([groupId, groupName]) => {
-        const groupElement = document.createElement('div');
-        groupElement.className = 'group-card bg-white p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50';
-        groupElement.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">
-              ${groupName.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <p class="text-sm font-medium">${groupName}</p>
-              <p class="text-xs text-gray-500">${groupId.substring(0, 6)}...</p>
-            </div>
-          </div>
-        `;
-        
-        groupElement.addEventListener('click', () => {
-          joinGroup(groupId, groupName);
-        });
-        
-        myGroupsList.appendChild(groupElement);
-      });
-    }
-
-    // Load available groups (demo data)
-    function loadAvailableGroups() {
-      availableGroupsList.innerHTML = '';
-      
-      // Demo groups
-      const demoGroups = [
-        { id: 'abc123', name: 'General Chat', members: 12 },
-        { id: 'def456', name: 'Tech Talk', members: 8 },
-        { id: 'ghi789', name: 'Music Lovers', members: 15 },
-        { id: 'jkl012', name: 'Book Club', members: 6 },
-        { id: 'mno345', name: 'Travel Enthusiasts', members: 9 },
-        { id: 'pqr678', name: 'Foodies', members: 11 }
-      ];
-      
-      demoGroups.forEach(group => {
-        const groupElement = document.createElement('div');
-        groupElement.className = 'group-card bg-white p-4 rounded-lg border border-gray-200 cursor-pointer';
-        groupElement.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <div class="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
-              ${group.name.charAt(0).toUpperCase()}
-            </div>
-            <div class="flex-1">
-              <p class="font-medium">${group.name}</p>
-              <p class="text-sm text-gray-500">${group.members} members</p>
-            </div>
-            <button class="join-group-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-1 rounded-lg transition" data-group-id="${group.id}" data-group-name="${group.name}">
-              Join
-            </button>
-          </div>
-        `;
-        
-        availableGroupsList.appendChild(groupElement);
-      });
-      
-      // Add event listeners to join buttons
-      document.querySelectorAll('.join-group-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const groupId = e.target.getAttribute('data-group-id');
-          const groupName = e.target.getAttribute('data-group-name');
-          joinGroup(groupId, groupName);
-        });
-      });
-    }
-
-    // Event listeners
-    joinGroupBtn.addEventListener('click', () => {
-      const groupId = document.getElementById('groupIdInput').value.trim();
-      if (groupId) {
-        joinGroup(groupId);
-      } else {
-        alert('Please enter a group code');
-      }
-    });
-
-    createGroupBtn.addEventListener('click', () => {
-      const groupName = document.getElementById('newGroupNameInput').value.trim() || `My Group ${Math.floor(Math.random() * 100)}`;
-      createGroup(groupName);
-    });
-
-    browseGroupsBtn.addEventListener('click', () => {
-      welcomeScreen.classList.add('hidden');
-      availableGroupsScreen.classList.remove('hidden');
-      loadAvailableGroups();
-    });
-
-    showAllGroupsBtn.addEventListener('click', () => {
-      welcomeScreen.classList.add('hidden');
-      availableGroupsScreen.classList.remove('hidden');
-      loadAvailableGroups();
-    });
-
-    backToWelcomeBtn.addEventListener('click', () => {
-      welcomeScreen.classList.remove('hidden');
-      availableGroupsScreen.classList.add('hidden');
-    });
-
-    sendBtn.addEventListener('click', sendMessage);
-
-    messageInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
-
-    inviteBtn.addEventListener('click', () => {
-      if (!currentGroup) return;
-      inviteCodeDisplay.value = currentGroup.id;
-      inviteLinkDisplay.value = `${window.location.origin}${window.location.pathname}?group=${currentGroup.id}`;
-      inviteModal.classList.remove('hidden');
-    });
-
-    closeInviteModalBtn.addEventListener('click', () => {
-      inviteModal.classList.add('hidden');
-    });
-
-    copyInviteBtn.addEventListener('click', () => {
-      clipboard.writeText(inviteCodeDisplay.value).then(() => {
-        alert('Group code copied to clipboard!');
-      });
-    });
-
-    copyLinkBtn.addEventListener('click', () => {
-      clipboard.writeText(inviteLinkDisplay.value).then(() => {
-        alert('Invite link copied to clipboard!');
-      });
-    });
-
-    clearMessagesBtn.addEventListener('click', () => {
-      clearMessagesModal.classList.remove('hidden');
-    });
-
-    cancelClearBtn.addEventListener('click', () => {
-      clearMessagesModal.classList.add('hidden');
-    });
-
-    confirmClearBtn.addEventListener('click', () => {
-      if (currentGroup) {
-        gun.get(`group_${currentGroup.id}`).put(null);
-        messagesContainer.innerHTML = '';
-      }
-      clearMessagesModal.classList.add('hidden');
-    });
-
-    leaveGroupBtn.addEventListener('click', () => {
-      leaveGroupModal.classList.remove('hidden');
-    });
-
-    cancelLeaveBtn.addEventListener('click', () => {
-      leaveGroupModal.classList.add('hidden');
-    });
-
-    confirmLeaveBtn.addEventListener('click', () => {
-      if (currentGroup) {
-        removeJoinedGroup(currentGroup.id);
-        currentGroup = null;
-        
-        // Return to welcome screen
-        welcomeScreen.classList.remove('hidden');
-        chatArea.classList.add('hidden');
-        messageInputArea.classList.add('hidden');
-      }
-      leaveGroupModal.classList.add('hidden');
-    });
-
-    toggleSidebarBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('hidden');
-    });
-
-    // Check URL for group parameter
-    function checkUrlForGroup() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const groupId = urlParams.get('group');
-      
-      if (groupId) {
-        joinGroup(groupId);
-      }
-    }
-
-    // Initialize
-    updateMyGroupsList();
-    checkUrlForGroup();
+    // Initialize the app
+    checkUrlForGroupId();
   </script>
 </body>
 </html>
