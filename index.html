@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A real-time group chat application" />
+  <meta name="theme-color" content="#10b981" />
+  <title>ConnectChat - Group Messaging</title>
+  <link rel="manifest" id="manifestPlaceholder" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard-polyfill/3.0.3/clipboard-polyfill.js"></script>
+  <style>
+    .message-bubble {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .tooltip {
+      position: relative;
+    }
+    
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 120px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Scrollbar styling */
+    #messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #messages::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    #messages::-webkit-scrollbar-thumb {
+      background: #10b981;
+      border-radius: 10px;
+    }
+    
+    #messages::-webkit-scrollbar-thumb:hover {
+      background: #0e9f6e;
+    }
+    
+    .notification {
+      animation: slideIn 0.5s forwards;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 flex flex-col h-screen">
+  <!-- Install banner -->
+  <div id="installBanner" class="hidden fixed top-0 left-0 right-0 bg-emerald-600 text-white p-4 shadow-lg z-50 notification">
+    <div class="flex justify-between items-center max-w-6xl mx-auto">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white rounded-full p-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <p class="font-medium">Add ConnectChat to your home screen!</p>
+          <p class="text-sm text-emerald-100">For a better experience and quicker access</p>
+        </div>
+      </div>
+      <div class="flex space-x-2">
+        <button id="installBtn" class="bg-white text-emerald-600 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition">Install</button>
+        <button id="closeBannerBtn" class="text-emerald-100 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat interface -->
+  <div class="flex flex-col h-full max-w-6xl mx-auto shadow-lg">
+    <!-- Sidebar and main content container -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar (hidden on mobile) -->
+      <div id="sidebar" class="hidden md:flex md:w-1/4 bg-white border-r border-gray-200 flex-col">
+        <!-- Group info -->
+        <div class="p-4 border-b border-gray-200">
+          <div class="flex items-center space-x-3">
+            <div id="groupAvatar" class="h-12 w-12 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xl">
+              C
+            </div>
+            <div>
+              <h2 id="groupNameDisplay" class="font-bold text-gray-800">ConnectChat</h2>
+              <p id="groupMemberCount" class="text-sm text-gray-500">1 member</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Group actions -->
+        <div class="p-4 border-b border-gray-200">
+          <button id="inviteBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 px-4 flex items-center justify-center space-x-2 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Invite Others</span>
+          </button>
+        </div>
+        
+        <!-- Members list -->
+        <div class="p-4">
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Members</h3>
+          <div id="membersList" class="space-y-3">
+            <!-- Members will be listed here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Main chat area -->
+      <div class="flex-1 flex flex-col bg-gray-50">
+        <!-- Chat header -->
+        <header class="bg-emerald-600 text-white p-4 flex items-center justify-between shadow-md">
+          <div class="flex items-center space-x-3">
+            <button id="toggleSidebarBtn" class="md:hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 id="chatHeader" class="text-xl font-semibold">ConnectChat</h1>
+          </div>
+          <div class="flex space-x-2">
+            <button id="toggleThemeBtn" class="p-2 rounded-full hover:bg-emerald-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
+            <button id="notificationBtn" class="p-2 rounded-full hover:bg-emerald-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Welcome screen -->
+        <div id="welcomeScreen" class="flex-1 flex flex-col items-center justify-center p-6 bg-white">
+          <div class="text-center max-w-md">
+            <div class="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome to ConnectChat!</h2>
+            <p class="text-gray-600 mb-6">Join a group chat or create your own to start messaging with friends, family, or colleagues.</p>
+            
+            <div class="space-y-4">
+              <!-- Join existing group -->
+              <div>
+                <label for="groupIdInput" class="block text-sm font-medium text-gray-700 text-left mb-2">Join a group with code:</label>
+                <div class="flex">
+                  <input type="text" id="groupIdInput" placeholder="Enter group code" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                  <button id="joinGroupBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-r-lg transition">Join</button>
+                </div>
+              </div>
+              
+              <!-- Create new group -->
+              <div>
+                <label for="newGroupNameInput" class="block text-sm font-medium text-gray-700 text-left mb-2">Create a new group:</label>
+                <div class="flex">
+                  <input type="text" id="newGroupNameInput" placeholder="Group name" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                  <button id="createGroupBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-r-lg transition">Create</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages area -->
+        <main id="chatArea" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 hidden">
+          <div id="messages" class="space-y-3 pb-4">
+            <!-- Messages will appear here -->
+          </div>
+        </main>
+
+        <!-- Input area -->
+        <footer id="messageInputArea" class="p-4 bg-white border-t border-gray-200 hidden">
+          <div class="flex items-center space-x-2">
+            <input
+              id="username"
+              type="text"
+              placeholder="Your name"
+              class="border border-gray-300 rounded-lg px-4 py-2 w-1/4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            />
+            <div class="relative flex-1">
+              <input
+                id="message"
+                type="text"
+                placeholder="Type a message"
+                class="border border-gray-300 rounded-lg pl-4 pr-12 py-2 w-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              />
+              <button id="emojiBtn" class="absolute right-12 top-2.5 text-gray-500 hover:text-emerald-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            </div>
+            <button
+              id="send"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg transition flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification toast -->
+  <div id="notificationToast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    New message from <span id="notificationSender">User</span>
+  </div>
+
+  <!-- Invite modal -->
+  <div id="inviteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold mb-4">Invite Others to Join</h3>
+      <p class="text-gray-600 mb-4">Share this group code with others to let them join:</p>
+      
+      <div class="flex mb-6">
+        <input id="inviteCodeDisplay" type="text" readonly class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 bg-gray-50" value="Loading...">
+        <button id="copyInviteBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-r-lg transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+      </div>
+      
+      <p class="text-gray-600 mb-4">Or share this direct link:</p>
+      <div class="flex mb-6">
+        <input id="inviteLinkDisplay" type="text" readonly class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 bg-gray-50" value="Loading...">
+        <button id="copyLinkBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-r-lg transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="flex justify-end">
+        <button id="closeInviteModalBtn" class="text-gray-500 hover:text-gray-700">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // PWA setup
+    const manifestData = {
+      name: "ConnectChat",
+      short_name: "ConnectChat",
+      description: "Real-time group messaging app",
+      start_url: "/",
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: "#10b981",
+      icons: [
+        {
+          src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiMxMGI5ODE7Ij48cGF0aCBkPSJNOCAxMmguMDFNMTIgMTJoLjAxTTE2IDEyaC4wMU0yMSAxMmMwIDQuNDE4LTQuMDMgOC05IDhhOS44NjMgOS44NjMgMCAwMS00LjI1NS0uOTQ5TDMgMjBsMS4zOTUtMy43MkMzLjUxMiAxNS4wNDIgMyAxMy41NzQgMyAxMmMwLTQuNDE4IDQuMDMtOCA5LThzOSAzLjU4MiA5IDh6Ij48L3BhdGg+PC9zdmc+",
+          sizes: "512x512",
+          type: "image/svg+xml",
+          purpose: "any maskable"
+        }
+      ]
+    };
+
+    const manifestString = JSON.stringify(manifestData);
+    const manifestBlob = new Blob([manifestString], {type: 'application/json'});
+    const manifestUrl = URL.createObjectURL(manifestBlob);
+    document.getElementById('manifestPlaceholder').href = manifestUrl;
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      // We would register a service worker here in a real app
+      // For this demo, we'll just simulate the install behavior
+    }
+
+    // PWA install prompt
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    const closeBannerBtn = document.getElementById('closeBannerBtn');
+
+    // Show install banner after a delay
+    setTimeout(() => {
+      installBanner.classList.remove('hidden');
+    }, 3000);
+
+    installBtn.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choiceResult => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        // Fallback for demo
+        alert('To install this app on your device:\n\n1. Add this page to your home screen\n2. Look for "Add to Home Screen" in your browser menu');
+      }
+      installBanner.classList.add('hidden');
+    });
+
+    closeBannerBtn.addEventListener('click', () => {
+      installBanner.classList.add('hidden');
+    });
+
+    // Initialize Gun with a relay server
+    const gun = Gun('https://gun-manhattan.herokuapp.com/gun');
+
+    // Main app functionality
+    let currentUser = localStorage.getItem('username') || '';
+    let currentGroupId = null;
+    let activeMembers = {};
+    let currentGroupName = 'ConnectChat';
+
+    // Set username from localStorage if available
+    const usernameInput = document.getElementById('username');
+    if (currentUser) {
+      usernameInput.value = currentUser;
+    }
+
+    // DOM Elements
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const chatArea = document.getElementById('chatArea');
+    const messageInputArea = document.getElementById('messageInputArea');
+    const messageInput = document.getElementById('message');
+    const sendButton = document.getElementById('send');
+    const messagesContainer = document.getElementById('messages');
+    const membersList = document.getElementById('membersList');
+    const groupMemberCount = document.getElementById('groupMemberCount');
+    const chatHeader = document.getElementById('chatHeader');
+    const groupNameDisplay = document.getElementById('groupNameDisplay');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const sidebar = document.getElementById('sidebar');
+    const joinGroupBtn = document.getElementById('joinGroupBtn');
+    const createGroupBtn = document.getElementById('createGroupBtn');
+    const inviteBtn = document.getElementById('inviteBtn');
+    const inviteModal = document.getElementById('inviteModal');
+    const closeInviteModalBtn = document.getElementById('closeInviteModalBtn');
+    const inviteCodeDisplay = document.getElementById('inviteCodeDisplay');
+    const inviteLinkDisplay = document.getElementById('inviteLinkDisplay');
+    const copyInviteBtn = document.getElementById('copyInviteBtn');
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const notificationToast = document.getElementById('notificationToast');
+    const notificationSender = document.getElementById('notificationSender');
+    const groupIdInput = document.getElementById('groupIdInput');
+    const newGroupNameInput = document.getElementById('newGroupNameInput');
+    const groupAvatar = document.getElementById('groupAvatar');
+
+    // Check URL for group ID
+    function checkUrlForGroupId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const groupId = urlParams.get('group');
+      if (groupId) {
+        joinGroup(groupId);
+      }
+    }
+
+    // Create a new group
+    createGroupBtn.addEventListener('click', () => {
+      const groupName = newGroupNameInput.value.trim();
+      if (groupName) {
+        // Generate a random group ID
+        const groupId = Math.random().toString(36).substring(2, 10);
+        joinGroup(groupId, groupName);
+      } else {
+        showNotification('Please enter a group name');
+      }
+    });
+
+    // Join existing group
+    joinGroupBtn.addEventListener('click', () => {
+      const groupId = groupIdInput.value.trim();
+      if (groupId) {
+        joinGroup(groupId);
+      } else {
+        showNotification('Please enter a group code');
+      }
+    });
+
+    // Join a group function
+    function joinGroup(groupId, newGroupName = null) {
+      currentGroupId = groupId;
+      
+      // Save group ID to URL for sharing
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('group', groupId);
+      window.history.pushState({}, '', newUrl);
+      
+      // Get username first
+      if (!usernameInput.value.trim()) {
+        const randomUsername = 'User' + Math.floor(Math.random() * 1000);
+        usernameInput.value = randomUsername;
+      }
+      currentUser = usernameInput.value.trim();
+      localStorage.setItem('username', currentUser);
+      
+      // Switch to chat view
+      welcomeScreen.classList.add('hidden');
+      chatArea.classList.remove('hidden');
+      messageInputArea.classList.remove('hidden');
+      
+      // Set up group
+      const group = gun.get(`groups/${groupId}`);
+      
+      // Set group name if provided
+      if (newGroupName) {
+        group.get('name').put(newGroupName);
+      }
+      
+      // Listen for group name
+      group.get('name').on((name) => {
+        if (name) {
+          currentGroupName = name;
+          chatHeader.textContent = name;
+          groupNameDisplay.textContent = name;
+          
+          // Set first letter as avatar
+          groupAvatar.textContent = name.charAt(0).toUpperCase();
+        }
+      });
+      
+      // Listen for messages
+      group.get('messages').map().on((data, id) => {
+        if (data && data.user && data.text && data.timestamp) {
+          displayMessage(data, id);
+          
+          // Show notification if not from current user
+          if (data.user !== currentUser && document.hidden) {
+            notificationSender.textContent = data.user;
+            notificationToast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+              notificationToast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+            
+            // Show browser notification if permitted
+            if (Notification.permission === 'granted') {
+              new Notification(`New message from ${data.user}`, {
+                body: data.text,
+                icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiMxMGI5ODE7Ij48cGF0aCBkPSJNOCAxMmguMDFNMTIgMTJoLjAxTTE2IDEyaC4wMU0yMSAxMmMwIDQuNDE4LTQuMDMgOC05IDhhOS44NjMgOS44NjMgMCAwMS00LjI1NS0uOTQ5TDMgMjBsMS4zOTUtMy43MkMzLjUxMiAxNS4wNDIgMyAxMy41NzQgMyAxMmMwLTQuNDE4IDQuMDMtOCA5LThzOSAzLjU4MiA5IDh6Ij48L3BhdGg+PC9zdmc+'
+              });
+            }
+          }
+        }
+      });
+      
+      // Handle member presence
+      const memberNode = group.get('members').get(currentUser);
+      memberNode.put({
+        lastSeen: Date.now(),
+        active: true
+      });
+      
+      // Update last seen regularly
+      setInterval(() => {
+        if (currentGroupId) {
+          memberNode.get('lastSeen').put(Date.now());
+        }
+      }, 30000);
+      
+      // Handle member leaving
+      window.addEventListener('beforeunload', () => {
+        memberNode.get('active').put(false);
+      });
+      
+      // Listen for members
+      group.get('members').map().on((data, id) => {
+        if (data && data.lastSeen) {
+          // Add to active members
+          const isActive = data.active !== false && Date.now() - data.lastSeen < 300000; // 5 minutes
+          activeMembers[id] = {
+            name: id,
+            lastSeen: data.lastSeen,
+            active: isActive
+          };
+          
+          updateMembersList();
+        }
+      });
+      
+      // Set up invite modal
+      inviteCodeDisplay.value = groupId;
+      inviteLinkDisplay.value = `${window.location.origin}${window.location.pathname}?group=${groupId}`;
+      
+      // Show welcome message
+      const welcomeMessage = {
+        user: 'System',
+        text: `${currentUser} has joined the chat`,
+        timestamp: Date.now()
+      };
+      group.get('messages').set(welcomeMessage);
+    }
+
+    // Update members list display
+    function updateMembersList() {
+      membersList.innerHTML = '';
+      let activeCount = 0;
+      
+      Object.keys(activeMembers).forEach(memberId => {
+        const member = activeMembers[memberId];
+        if (member.active) activeCount++;
+        
+        const memberElement = document.createElement('div');
+        memberElement.className = 'flex items-center space-x-2';
+        
+        const statusColor = member.active ? 'bg-emerald-500' : 'bg-gray-400';
+        const statusText = member.active ? 'Online' : 'Offline';
+        
+        memberElement.innerHTML = `
+          <div class="relative">
+            <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-medium">
+              ${memberId.charAt(0).toUpperCase()}
+            </div>
+            <div class="absolute bottom-0 right-0 h-3 w-3 ${statusColor} rounded-full border-2 border-white"></div>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">${memberId}</p>
+            <p class="text-xs text-gray-500">${statusText}</p>
+          </div>
+        `;
+        
+        membersList.appendChild(memberElement);
+      });
+      
+      groupMemberCount.textContent = `${activeCount} member${activeCount !== 1 ? 's' : ''}`;
+    }
+
+    // Display a message in the chat
+    function displayMessage(data, id) {
+      // Check if message already exists
+      if (document.getElementById(`message-${id}`)) return;
+      
+      const isCurrentUser = data.user === currentUser;
+      const messageElement = document.createElement('div');
+      messageElement.id = `message-${id}`;
+      messageElement.className = `message-bubble flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`;
+      
+      const bubbleClass = isCurrentUser 
+        ? 'bg-emerald-600 text-white rounded-l-lg rounded-br-lg' 
+        : 'bg-white text-gray-800 rounded-r-lg rounded-bl-lg border border-gray-200';
+      
+      const time = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      messageElement.innerHTML = `
+        <div class="max-w-xs md:max-w-md lg:max-w-lg">
+          ${!isCurrentUser ? `<p class="text-xs font-semibold text-gray-600 mb-1">${data.user}</p>` : ''}
+          <div class="flex items-end space-x-1">
+            <div class="${bubbleClass} px-4 py-2">
+              <p class="break-words">${data.text}</p>
+            </div>
+            <p class="text-xs text-gray-500">${time}</p>
+          </div>
+        </div>
+      `;
+      
+      messagesContainer.appendChild(messageElement);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Send a message
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text || !currentGroupId || !currentUser) return;
+      
+      const message = {
+        user: currentUser,
+        text: text,
+        timestamp: Date.now()
+      };
+      
+      // Save to GunDB
+      const group = gun.get(`groups/${currentGroupId}`);
+      group.get('messages').set(message);
+      
+      // Clear input
+      messageInput.value = '';
+    }
+
+    // Event listeners
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Toggle sidebar on mobile
+    toggleSidebarBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+
+    // Show invite modal
+    inviteBtn.addEventListener('click', () => {
+      inviteModal.classList.remove('hidden');
+    });
+
+    // Close invite modal
+    closeInviteModalBtn.addEventListener('click', () => {
+      inviteModal.classList.add('hidden');
+    });
+
+    // Copy invite code
+    copyInviteBtn.addEventListener('click', () => {
+      clipboardPolyfill.writeText(inviteCodeDisplay.value)
+        .then(() => showNotification('Group code copied!'))
+        .catch(err => console.error('Failed to copy:', err));
+    });
+
+    // Copy invite link
+    copyLinkBtn.addEventListener('click', () => {
+      clipboardPolyfill.writeText(inviteLinkDisplay.value)
+        .then(() => showNotification('Link copied!'))
+        .catch(err => console.error('Failed to copy:', err));
+    });
+
+    // Show notification
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // Request notification permission
+    notificationBtn.addEventListener('click', () => {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            showNotification('Notifications enabled!');
+          }
+        });
+      } else if (Notification.permission === 'granted') {
+        showNotification('Notifications are already enabled');
+      } else {
+        showNotification('Notifications are blocked in your browser settings');
+      }
+    });
+
+    // Toggle dark/light theme
+    const toggleThemeBtn = document.getElementById('toggleThemeBtn');
+    toggleThemeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Check for saved theme preference
+    if (localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+
+    // Initialize the app
+    checkUrlForGroupId();
+  </script>
+</body>
+</html>
